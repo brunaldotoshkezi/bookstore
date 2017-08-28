@@ -1,16 +1,41 @@
 /**
  * Created by brunaldo.toshkezi on 8/25/2017.
  */
-    var myApp=angular.module("myApp",[]);
+    var myApp=angular.module("myApp",["ngRoute","ngAnimate"]);
 
-myApp.controller("HeaderCtrl",function($scope) {
-    $scope.appDetails = {};
-    $scope.appDetails.title = "BooKart";
-    $scope.appDetails.tagline = "We have collection of 1 Million books";
+myApp.config(function($routeProvider) {
+    $routeProvider
+        .when("/books", {
+            templateUrl: "partials/book-list.html",
+            controller: "BookListCtrl"
+        })
+        .when("/kart", {
+            templateUrl: "partials/kart-list.html",
+            controller: "KartListCtrl"
+        })
+        .otherwise({
+            redirectTo: "/books"
+        });
 });
 
-myApp.controller("BookListCtrl",function($scope) {
-    $scope.books=[
+myApp.factory("kartService",function(){
+    var kart=[];
+
+    return{
+        getKart:function(){
+            return kart
+        },
+        addToKart:function(book){
+            kart.push(book);
+        },
+        buy:function(book){
+            alert('Thanks for buying',book.name);
+        }
+    }
+});
+
+myApp.factory("bookService",function(){
+    var books=[
         {
             imgUrl: "adultery.jpeg",
             name: "Adultery",
@@ -71,10 +96,44 @@ myApp.controller("BookListCtrl",function($scope) {
             releaseDate: "25-08-2000",
             details: "Wings of Fire traces the life and times of India's former president A.P.J. Abdul Kalam. It gives a glimpse of his childhood as well as his growth as India's Missile Man. Summary of the Book Wings... View More"
         }
+
     ];
+    return{
+        getBooks:function(){
+            return books;
+        }
+    }
+});
+
+
+myApp.controller("HeaderCtrl",function($scope,$location) {
+    $scope.appDetails = {};
+    $scope.appDetails.title = "BooKart";
+    $scope.appDetails.tagline = "We have collection of 1 Million books";
+
+    $scope.nav = {};
+    $scope.nav.isActive = function(path) {
+        if (path === $location.path()) {
+            return true;
+        }
+
+        return false;
+    }
+});
+
+myApp.controller("KartListCtrl",function($scope,kartService){
+   $scope.kart=kartService.getKart();
+
+    $scope.buy=function(book){
+        kartService.buy(book);
+    }
+});
+
+myApp.controller("BookListCtrl",function($scope,bookService,kartService) {
+    $scope.books=bookService.getBooks();
 
     $scope.addToKart = function(book) {
-        console.log("add to kart: ", book);
+        kartService.addToKart(book);
     }
 
 });
